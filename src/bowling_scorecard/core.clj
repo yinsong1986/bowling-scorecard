@@ -131,6 +131,52 @@
     nil))
 
 (defn -main
-  "I don't do a whole lot ... yet."
+  "A demo for using the APIs."
   [& args]
-  (println "Hello, World!"))
+  (println "Creating a new score card")
+  (def score_card (new-scorecard))
+  (println score_card)
+
+  (println "Add the 1st frame")
+  (def score_card (score-a-frame score_card "x"))
+  (println score_card)
+
+  (println "Add the 2nd frame")
+  (def score_card (score-a-frame score_card "7" "/"))
+  (println score_card)
+
+  (println "Add the 3rd frame")
+  (def score_card (score-a-frame score_card "7" "2"))
+  (println score_card)
+  
+  (println "Add the 4th frame")
+  (def score_card (score-a-frame score_card "9" "/"))
+  (println score_card)
+  
+  (println "Add the 5th frame")
+  (def score_card (score-a-frame score_card "x"))
+  (println score_card)  
+
+  (println "Add the 6th frame")
+  (def score_card (score-a-frame score_card "x"))
+  (println score_card)
+  
+  (println "Add the 7th frame")
+  (def score_card (score-a-frame score_card "x"))
+  (println score_card)  
+
+  (println "Add the 8th frame")
+  (def score_card (score-a-frame score_card "2" "3"))
+  (println score_card)
+
+  (println "Add the 9th frame")
+  (def score_card (score-a-frame score_card "6" "/"))
+  (println score_card)
+
+  (println "Add the 10th frame")
+  (def score_card (score-a-frame score_card "7" "/" "3"))
+  (println score_card)
+
+  (println "Show the final score:")
+  (def final_score (check-complete score_card))
+  (println final_score))
