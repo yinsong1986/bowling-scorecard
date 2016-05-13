@@ -15,10 +15,10 @@ Run unit tests
 
 You should see the following results.
 
-   lein test bowling-scorecard.core-test
-
-   Ran 11 tests containing 75 assertions.
-   0 failures, 0 errors.
+    lein test bowling-scorecard.core-test
+    
+    Ran 11 tests containing 75 assertions.
+    0 failures, 0 errors.
 
 Run Demo
 
@@ -53,18 +53,18 @@ You should see results as below.
    
 ## Examples of using the APIs
 
-1. Create an empty score card
+###1. Create an empty score card
 
     (new-scorecard) ;-> []
 
-2. Given a score card, score a frame
+###2. Given a score card, score a frame
 
     (def score_card (new-scorecard)) ; create a new scorecard
     (score-a-frame score_card "x") ;-> [["x"]]
     (score-a-frame score_card "7" "/") ;-> [["7" "/"]]
     (score-a-frame score_card "7" "2") ;-> [["7" "2"]]
 
-3. Determine whether a game is complete - if so, provide the final score
+###3. Determine whether a game is complete - if so, provide the final score
 
     (def score_card [["x"] ["7" "/"] ["7" "2"] ["9" "/"] ["x"] ["x"] ["x"] ["2" "3"] ["6" "/"] ["7" "/" "3"]])
     (check-complete score_card) ;-> 168
