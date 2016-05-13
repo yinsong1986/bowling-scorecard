@@ -6,13 +6,69 @@
   (testing "creating a new empty scorecard"
     (is (= [] (new-scorecard)))))
 
+(deftest check-input-test
+  (testing "Check the three-ball input is legal format"
+    (is (= true (check-input "x" "x" "x")))
+    (is (= true (check-input "x" "x" "3")))
+    (is (= true (check-input "9" "/" "x")))
+    (is (= true (check-input "0" "/" "3")))
+    (is (= true (check-input "x" "8" "/")))
+    (is (= true (check-input "x" "8" "1")))
+    (is (thrown? Exception (check-input "x" "8" "2")))
+    (is (thrown? Exception (check-input "x" "/" "2")))
+    (is (thrown? Exception (check-input "x" "/" "/")))
+    (is (thrown? Exception (check-input 9 "x" "a")))
+    (is (thrown? Exception (check-input "a" "b" "c"))))
+  (testing "Check the two-ball input is legal format"
+    (is (= true (check-input "8" "/")))
+    (is (= true (check-input "8" "1")))
+    (is (= true (check-input "0" "0")))
+    (is (= true (check-input "0" "/")))
+    (is (= true (check-input "1" "8")))
+    (is (= true (check-input "2" "0")))
+    (is (thrown? Exception (check-input "x" "8")))
+    (is (thrown? Exception (check-input "x" "/")))
+    (is (thrown? Exception (check-input "/" "/")))
+    (is (thrown? Exception (check-input 9 "x")))
+    (is (thrown? Exception (check-input "a" "b"))))
+  (testing "Check the one-ball input is legal format"
+    (is (= true (check-input "x")))
+    (is (thrown? Exception (check-input "/")))
+    (is (thrown? Exception (check-input "2")))
+    (is (thrown? Exception (check-input "a")))
+    (is (thrown? Exception (check-input 9)))
+    (is (thrown? Exception (check-input "0")))))
+
 (deftest score-a-frame-test
-  (testing "Score the first frame."
-    (is (= [["7" "/"]] (score-a-frame [] "7" "/"))))
-  (testing "Score the correct last frame."
-    (is (= [["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x" "7" "/"]] (score-a-frame [["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"]] "x" "7" "/"))))
-  (testing "Return nil for the wrong last frame."
-    (is (= nil (score-a-frame [["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"]] "3" "7" "/")))))
+  (testing "Score the first 9 frame."
+    (is (= [["x"]] (score-a-frame [] "x")))
+    (is (= [["7" "/"]] (score-a-frame [] "7" "/")))
+    (is (= [["7" "2"]] (score-a-frame [] "7" "2")))
+    (is (thrown? Exception  (score-a-frame [] "7")))
+    (is (thrown? Exception  (score-a-frame [] "a")))
+    (is (thrown? Exception  (score-a-frame [] 0)))
+    (is (thrown? Exception  (score-a-frame [] "7" "3")))
+    (is (thrown? Exception  (score-a-frame [] "/" "3")))
+    (is (thrown? Exception  (score-a-frame [] "x" "3")))
+    (is (thrown? Exception  (score-a-frame [] "x" "/")))
+    (is (thrown? Exception  (score-a-frame [] "a" "3")))
+    (is (thrown? Exception  (score-a-frame [] 0 "3")))
+    (is (thrown? Exception  (score-a-frame [] "7" "/" "3"))))
+  (testing "Score the last frame."
+    (is (= [["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["2" "7"]] (score-a-frame [["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"]] "2" "7")))
+    (is (= [["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["7" "/" "3"]] (score-a-frame [["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"]] "7" "/" "3")))
+    (is (= [["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x" "7" "/"]] (score-a-frame [["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"]] "x" "7" "/")))
+    (is (thrown? Exception (score-a-frame [["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"]] "3")))
+    (is (thrown? Exception (score-a-frame [["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"]] "x")))
+    (is (thrown? Exception (score-a-frame [["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"]] "a")))
+    (is (thrown? Exception (score-a-frame [["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"]] "/")))
+    (is (thrown? Exception (score-a-frame [["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"]] 0)))
+    (is (thrown? Exception (score-a-frame [["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"]] "3" "7")))
+    (is (thrown? Exception (score-a-frame [["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"]] "7" "/")))
+    (is (thrown? Exception (score-a-frame [["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"]] "x" "x" "/")))
+    (is (thrown? Exception (score-a-frame [["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"]] "2" "7" "/")))
+    (is (thrown? Exception (score-a-frame [["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"]] "2" "7" "x")))
+    (is (thrown? Exception (score-a-frame [["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"] ["x"]] "3" "7" "/")))))
 
 (deftest intize-balls-test
   (testing "Transform a 3-ball frame to integers."

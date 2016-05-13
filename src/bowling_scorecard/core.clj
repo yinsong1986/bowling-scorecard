@@ -6,16 +6,66 @@
   []
   (vector))
 
+(defn check-input
+  "Check the input of the ball results."
+  ;; three balls
+  ([result_of_ball_1 result_of_ball_2 result_of_ball_3]
+    (if (and (string? result_of_ball_1) (string? result_of_ball_2) (string? result_of_ball_3)) ;; check if they are string
+      (if (and (re-matches #"[0-9]|x|/" result_of_ball_1) (re-matches #"[0-9]|x|/" result_of_ball_2) (re-matches #"[0-9]|x|/" result_of_ball_3)) ;; check if string are [0-9] x /
+        (cond
+          (re-matches #"x" result_of_ball_1) (cond ; first strike
+                                               (and (re-matches #"x" result_of_ball_2) (re-matches #"[0-9]|x" result_of_ball_3)) true 
+                                               (and (re-matches #"[0-9]" result_of_ball_2) (re-matches #"/" result_of_ball_3)) true
+                                               (and (re-matches #"[0-9]" result_of_ball_2) (re-matches #"[0-9]" result_of_ball_3) (< (+ (read-string result_of_ball_2) (read-string result_of_ball_3)) 10)) true
+                                               :else (throw (Exception. "Illeagal result of balls.")))
+          (and (re-matches #"[0-9]" result_of_ball_1) (re-matches #"/" result_of_ball_2) (re-matches #"[0-9]|x" result_of_ball_3)) true ; first spare
+          :else (throw (Exception. "Illeagal result of balls."))      
+        )
+        (throw (Exception. "The result must be string 0-9, x, /")))
+      (throw (Exception. "The results of balls must be string."))) 
+  )
+  ;; two balls
+  ([result_of_ball_1 result_of_ball_2]
+    (if (and (string? result_of_ball_1) (string? result_of_ball_2)) ;; check if they are string
+      (if (and (re-matches #"[0-9]|x|/" result_of_ball_1) (re-matches #"[0-9]|x|/" result_of_ball_2)) ;; check if string are [0-9] x /
+        (cond
+          (and (re-matches #"[0-9]" result_of_ball_1) (re-matches #"/" result_of_ball_2)) true ; spare
+          (and (re-matches #"[0-9]" result_of_ball_1) (re-matches #"[0-9]" result_of_ball_2) (< (+ (read-string result_of_ball_1) (read-string result_of_ball_2)) 10)) true ; open frame
+          :else (throw (Exception. "Illeagal result of balls."))
+        )
+        (throw (Exception. "The result must be string 0-9, x, /")))
+      (throw (Exception. "The results of balls must be string.")))
+  )
+  ;; one ball
+  ([result_of_ball_1]
+    (if (string? result_of_ball_1) ;; check if they are string 
+      (if (re-matches #"x" result_of_ball_1);; check if string is x, only strike is legal
+        true
+        (throw (Exception. "The result must be string x")))
+      (throw (Exception. "The results of balls must be string."))) 
+  )
+)
+
 (defn score-a-frame
-  "Given a score card, score a frame"
+  "Given a score card, record a frame"
   ;; three balls for special last frame
-  ([score_card, result_of_ball_1, result_of_ball_2, result_of_ball_3]
-     (if (and (= "x" result_of_ball_1) (= 9 (count score_card)))
+  ([score_card result_of_ball_1 result_of_ball_2 result_of_ball_3]
+     (if (and (check-input result_of_ball_1 result_of_ball_2 result_of_ball_3) (= 9 (count score_card)))
        (conj score_card [result_of_ball_1 result_of_ball_2 result_of_ball_3])
-       nil))
+       (throw (Exception. "Illeagal result of balls.."))))
   ;; two balls for other cases
-  ([score_card, result_of_ball_1, result_of_ball_2]
-     (conj score_card [result_of_ball_1 result_of_ball_2])))
+  ([score_card result_of_ball_1 result_of_ball_2]
+     (if (check-input result_of_ball_1 result_of_ball_2)
+       (if (and (re-matches #"[0-9]" result_of_ball_1) (re-matches #"/" result_of_ball_2) (= 9 (count score_card))) ; Special treatment for last frame
+         (throw (Exception. "Illegal last two-ball frame."))
+         (conj score_card [result_of_ball_1 result_of_ball_2]))
+       (throw (Exception. "Unknown exception."))))
+  ([score_card result_of_ball_1 ]
+     (if (check-input result_of_ball_1)
+       (if (= 9 (count score_card)) ; Special treatment for last frame
+         (throw (Exception. "Illegal last one-ball frame."))
+         (conj score_card [result_of_ball_1]))
+       (throw (Exception. "Unknown exception..")))))
 
 (defn intize-balls
   "Change the raw score format of balls in a frame, e.g., x, / to integer score"
