@@ -1,22 +1,31 @@
 (ns bowling-scorecard.core
   (:gen-class))
-
+;;; 1. Create an empty score card
 (defn new-scorecard
   "Create an empty score card"
   []
   (vector))
 
+;;; 2. Given a score card, score a frame
 (defn check-input
   "Check the input of the ball results."
   ;; three balls
   ([result_of_ball_1 result_of_ball_2 result_of_ball_3]
-    (if (and (string? result_of_ball_1) (string? result_of_ball_2) (string? result_of_ball_3)) ;; check if they are string
-      (if (and (re-matches #"[0-9]|x|/" result_of_ball_1) (re-matches #"[0-9]|x|/" result_of_ball_2) (re-matches #"[0-9]|x|/" result_of_ball_3)) ;; check if string are [0-9] x /
+    (if (and (string? result_of_ball_1)
+          (string? result_of_ball_2)
+          (string? result_of_ball_3)) ;; check if they are string
+      (if (and (re-matches #"[0-9]|x|/" result_of_ball_1)
+            (re-matches #"[0-9]|x|/" result_of_ball_2)
+            (re-matches #"[0-9]|x|/" result_of_ball_3)) ;; check if string are [0-9] x /
         (cond
           (re-matches #"x" result_of_ball_1) (cond ; first strike
-                                               (and (re-matches #"x" result_of_ball_2) (re-matches #"[0-9]|x" result_of_ball_3)) true 
-                                               (and (re-matches #"[0-9]" result_of_ball_2) (re-matches #"/" result_of_ball_3)) true
-                                               (and (re-matches #"[0-9]" result_of_ball_2) (re-matches #"[0-9]" result_of_ball_3) (< (+ (read-string result_of_ball_2) (read-string result_of_ball_3)) 10)) true
+                                               (and (re-matches #"x" result_of_ball_2)
+                                                 (re-matches #"[0-9]|x" result_of_ball_3)) true 
+                                               (and (re-matches #"[0-9]" result_of_ball_2)
+                                                 (re-matches #"/" result_of_ball_3)) true
+                                               (and (re-matches #"[0-9]" result_of_ball_2)
+                                                 (re-matches #"[0-9]" result_of_ball_3)
+                                                 (< (+ (read-string result_of_ball_2) (read-string result_of_ball_3)) 10)) true
                                                :else (throw (Exception. "Illeagal result of balls.")))
           (and (re-matches #"[0-9]" result_of_ball_1) (re-matches #"/" result_of_ball_2) (re-matches #"[0-9]|x" result_of_ball_3)) true ; first spare
           :else (throw (Exception. "Illeagal result of balls."))      
@@ -26,11 +35,16 @@
   )
   ;; two balls
   ([result_of_ball_1 result_of_ball_2]
-    (if (and (string? result_of_ball_1) (string? result_of_ball_2)) ;; check if they are string
-      (if (and (re-matches #"[0-9]|x|/" result_of_ball_1) (re-matches #"[0-9]|x|/" result_of_ball_2)) ;; check if string are [0-9] x /
+    (if (and (string? result_of_ball_1)
+          (string? result_of_ball_2)) ;; check if they are string
+      (if (and (re-matches #"[0-9]|x|/" result_of_ball_1)
+            (re-matches #"[0-9]|x|/" result_of_ball_2)) ;; check if string are [0-9] x /
         (cond
-          (and (re-matches #"[0-9]" result_of_ball_1) (re-matches #"/" result_of_ball_2)) true ; spare
-          (and (re-matches #"[0-9]" result_of_ball_1) (re-matches #"[0-9]" result_of_ball_2) (< (+ (read-string result_of_ball_1) (read-string result_of_ball_2)) 10)) true ; open frame
+          (and (re-matches #"[0-9]" result_of_ball_1)
+            (re-matches #"/" result_of_ball_2)) true ; spare
+          (and (re-matches #"[0-9]" result_of_ball_1)
+            (re-matches #"[0-9]" result_of_ball_2)
+            (< (+ (read-string result_of_ball_1) (read-string result_of_ball_2)) 10)) true ; open frame
           :else (throw (Exception. "Illeagal result of balls."))
         )
         (throw (Exception. "The result must be string 0-9, x, /")))
@@ -50,13 +64,16 @@
   "Given a score card, record a frame"
   ;; three balls for special last frame
   ([score_card result_of_ball_1 result_of_ball_2 result_of_ball_3]
-     (if (and (check-input result_of_ball_1 result_of_ball_2 result_of_ball_3) (= 9 (count score_card)))
+     (if (and (check-input result_of_ball_1 result_of_ball_2 result_of_ball_3)
+           (= 9 (count score_card)))
        (conj score_card [result_of_ball_1 result_of_ball_2 result_of_ball_3])
        (throw (Exception. "Illeagal result of balls.."))))
   ;; two balls for other cases
   ([score_card result_of_ball_1 result_of_ball_2]
      (if (check-input result_of_ball_1 result_of_ball_2)
-       (if (and (re-matches #"[0-9]" result_of_ball_1) (re-matches #"/" result_of_ball_2) (= 9 (count score_card))) ; Special treatment for last frame
+       (if (and (re-matches #"[0-9]" result_of_ball_1)
+             (re-matches #"/" result_of_ball_2)
+             (= 9 (count score_card))) ; Special treatment for last frame
          (throw (Exception. "Illegal last two-ball frame."))
          (conj score_card [result_of_ball_1 result_of_ball_2]))
        (throw (Exception. "Unknown exception."))))
@@ -67,6 +84,7 @@
          (conj score_card [result_of_ball_1]))
        (throw (Exception. "Unknown exception..")))))
 
+;;; 3. Determine whether a game is complete - if so, provide the final score.
 (defn intize-balls
   "Change the raw score format of balls in a frame, e.g., x, / to integer score"
   [balls]
