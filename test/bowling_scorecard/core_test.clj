@@ -84,12 +84,17 @@
 (deftest strike?-test
   (testing "check if is a strike"
     (is (= true (strike? [10 3 4])))
-    (is (= false (strike? [5 3 4])))))
+    (is (= true (strike? [10])))
+    (is (= false (strike? [7 3 4])))
+    (is (= false (strike? [5 3])))))
 
 (deftest spare?-test
   (testing "check if is a spare"
     (is (= true (spare? [7 3 4])))
-    (is (= false (spare? [5 3 4])))))
+    (is (= true (spare? [6 4])))
+    (is (= false (spare? [10 3 4])))
+    (is (= false (spare? [5 3])))
+    (is (= false (spare? [10])))))
 
 (deftest final-frame-scores-test
   (testing "Count the final score of each frame."

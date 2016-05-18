@@ -128,7 +128,9 @@
 
 (defn spare? [balls]
   "Check if it is a spare."
-  (= 10 (apply + (take 2 balls))))
+  (if (> (count balls) 1)
+    (= 10 (apply + (take 2 balls)))
+    false))
 
 (defn final-frame-scores
   "Count the final scores of each frame"
