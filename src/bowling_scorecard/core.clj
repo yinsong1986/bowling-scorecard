@@ -7,82 +7,119 @@
   (vector))
 
 ;;; 2. Given a score card, score a frame
-(defn check-input
-  "Check the input of the ball results."
-  ;; three balls
-  ([result_of_ball_1 result_of_ball_2 result_of_ball_3]
-    (if (and (string? result_of_ball_1)
-          (string? result_of_ball_2)
-          (string? result_of_ball_3)) ;; check if they are string
-      (if (and (re-matches #"[0-9]|x|/" result_of_ball_1)
-            (re-matches #"[0-9]|x|/" result_of_ball_2)
-            (re-matches #"[0-9]|x|/" result_of_ball_3)) ;; check if string are [0-9] x /
-        (cond
-          (re-matches #"x" result_of_ball_1) (cond ; first strike
-                                               (and (re-matches #"x" result_of_ball_2)
-                                                 (re-matches #"[0-9]|x" result_of_ball_3)) true 
-                                               (and (re-matches #"[0-9]" result_of_ball_2)
-                                                 (re-matches #"/" result_of_ball_3)) true
-                                               (and (re-matches #"[0-9]" result_of_ball_2)
-                                                 (re-matches #"[0-9]" result_of_ball_3)
-                                                 (< (+ (read-string result_of_ball_2) (read-string result_of_ball_3)) 10)) true
-                                               :else (throw (Exception. "Illeagal result of balls.")))
-          (and (re-matches #"[0-9]" result_of_ball_1) (re-matches #"/" result_of_ball_2) (re-matches #"[0-9]|x" result_of_ball_3)) true ; first spare
-          :else (throw (Exception. "Illeagal result of balls."))      
-        )
-        (throw (Exception. "The result must be string 0-9, x, /")))
-      (throw (Exception. "The results of balls must be string."))) 
-  )
-  ;; two balls
-  ([result_of_ball_1 result_of_ball_2]
-    (if (and (string? result_of_ball_1)
-          (string? result_of_ball_2)) ;; check if they are string
-      (if (and (re-matches #"[0-9]|x|/" result_of_ball_1)
-            (re-matches #"[0-9]|x|/" result_of_ball_2)) ;; check if string are [0-9] x /
-        (cond
-          (and (re-matches #"[0-9]" result_of_ball_1)
-            (re-matches #"/" result_of_ball_2)) true ; spare
-          (and (re-matches #"[0-9]" result_of_ball_1)
-            (re-matches #"[0-9]" result_of_ball_2)
-            (< (+ (read-string result_of_ball_1) (read-string result_of_ball_2)) 10)) true ; open frame
-          :else (throw (Exception. "Illeagal result of balls."))
-        )
-        (throw (Exception. "The result must be string 0-9, x, /")))
-      (throw (Exception. "The results of balls must be string.")))
-  )
-  ;; one ball
-  ([result_of_ball_1]
-    (if (string? result_of_ball_1) ;; check if they are string 
-      (if (re-matches #"x" result_of_ball_1);; check if string is x, only strike is legal
-        true
-        (throw (Exception. "The result must be string x")))
-      (throw (Exception. "The results of balls must be string."))) 
-  )
+(defn intize-ball
+  "Transform ball to int or keyword, e.g., x, / to :strike, :spare"
+  [ball]
+  (cond
+    (= nil ball) nil ; dummy ball
+    (= "x" ball) :strike
+    (= "/" ball) :spare
+    (or
+      (= "0" ball)
+      (= "1" ball)
+      (= "2" ball)
+      (= "3" ball)
+      (= "4" ball)
+      (= "5" ball)
+      (= "6" ball)
+      (= "7" ball)
+      (= "8" ball)
+      (= "9" ball)) (read-string ball)
+    :else (throw (Exception. "Illeagal result of balls."))))
+
+(defn check-valid
+  "Check if the balls are valid for a frame, return valid ints or nil"
+  [result_of_ball_1 result_of_ball_2 result_of_ball_3 number_of_finished_frames]
+  (cond
+    ;; One ball
+    (and
+      (= false (nil? result_of_ball_1))
+      (= true (nil? result_of_ball_2))
+      (= true (nil? result_of_ball_3))) (if (and ; is strike and not the last frame
+                                              (= result_of_ball_1 :strike) ;
+                                              (< number_of_finished_frames 9))
+                                          [10]
+                                          nil)
+    ;; Two balls
+    (and 
+      (= false (nil? result_of_ball_1))
+      (= false (nil? result_of_ball_2))
+      (= true (nil? result_of_ball_3))) (cond
+                                          ; spare and not the last frame
+                                          (and
+                                            (integer? result_of_ball_1)
+                                            (= result_of_ball_2 :spare)
+                                            (< number_of_finished_frames 9)) [result_of_ball_1 (- 10 result_of_ball_1)]
+                                          ; open frame
+                                          (and
+                                            (integer? result_of_ball_1)
+                                            (integer? result_of_ball_2)
+                                            (< (+ result_of_ball_1 result_of_ball_2) 10)) [result_of_ball_1 result_of_ball_2]
+                                          ; others not valid
+                                          :else nil)
+    ;; Three balls, only valid for last frame
+    (and
+      (= false (nil? result_of_ball_1))
+      (= false (nil? result_of_ball_2))
+      (= false (nil? result_of_ball_3))
+      (= number_of_finished_frames 9)) (cond
+                                         ; strike, strike, strike
+                                         (and 
+                                           (= result_of_ball_1 :strike)
+                                           (= result_of_ball_2 :strike)
+                                           (= result_of_ball_3 :strike)) [10 10 10]
+                                         ; strike, strike, open frame
+                                         (and 
+                                           (= result_of_ball_1 :strike)
+                                           (= result_of_ball_2 :strike)
+                                           (integer? result_of_ball_3)) [10 10 result_of_ball_3]
+                                         ; strike, spare
+                                         (and 
+                                           (= result_of_ball_1 :strike)
+                                           (integer? result_of_ball_2)
+                                           (= result_of_ball_3 :spare)) [10 result_of_ball_2 (- 10 result_of_ball_2)]
+                                         ; strike, open frame
+                                         (and 
+                                           (= result_of_ball_1 :strike)
+                                           (integer? result_of_ball_2)
+                                           (integer? result_of_ball_3)
+                                           (< (+ result_of_ball_2 result_of_ball_3) 10)) [10 result_of_ball_2 result_of_ball_3]
+                                         ; spare, open frame
+                                         (and
+                                           (integer? result_of_ball_1)
+                                           (= result_of_ball_2 :spare)
+                                           (integer? result_of_ball_3)) [result_of_ball_1 (- 10 result_of_ball_1) result_of_ball_3]
+                                         ; spare, strike
+                                         (and
+                                           (integer? result_of_ball_1)
+                                           (= result_of_ball_2 :spare)
+                                           (= result_of_ball_3 :strike)) [result_of_ball_1 (- 10 result_of_ball_1) 10]
+                                         ; others not valid
+                                         :else nil) 
+    ;; Others not valid
+    :else nil
+ )
 )
 
 (defn score-a-frame
   "Given a score card, record a frame"
   ;; three balls for special last frame
   ([score_card result_of_ball_1 result_of_ball_2 result_of_ball_3]
-     (if (and (check-input result_of_ball_1 result_of_ball_2 result_of_ball_3)
-           (= 9 (count score_card)))
-       (conj score_card [result_of_ball_1 result_of_ball_2 result_of_ball_3])
-       (throw (Exception. "Illeagal result of balls.."))))
+    (let [valid_balls (check-valid
+                        (intize-ball result_of_ball_1)
+                        (intize-ball result_of_ball_2)
+                        (intize-ball result_of_ball_3)
+                        (count score_card))]
+      (if (nil? valid_balls) 
+        (throw (Exception. "Illeagal result of balls.."))
+        (conj score_card valid_balls))))
   ;; two balls for other cases
   ([score_card result_of_ball_1 result_of_ball_2]
-     (if (check-input result_of_ball_1 result_of_ball_2)
-       (if (and (re-matches #"[0-9]" result_of_ball_1)
-             (re-matches #"/" result_of_ball_2)
-             (= 9 (count score_card))) ; Special treatment for last frame
-         (throw (Exception. "Illegal last two-ball frame."))
-         (conj score_card [result_of_ball_1 result_of_ball_2]))
-       (throw (Exception. "Unknown exception."))))
-  ([score_card result_of_ball_1 ]
-     (if (check-input result_of_ball_1)
-       (if (= 9 (count score_card)) ; Special treatment for last frame
-         (throw (Exception. "Illegal last one-ball frame."))
-         (conj score_card [result_of_ball_1]))
-       (throw (Exception. "Unknown exception..")))))
+    (score-a-frame score_card result_of_ball_1 result_of_ball_2 nil))
+
+  ;; one ball
+  ([score_card result_of_ball_1]
+    (score-a-frame score_card result_of_ball_1 nil nil)))
 
 ;;; 3. Determine whether a game is complete - if so, provide the final score.
 (defn intize-balls
