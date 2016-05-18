@@ -122,26 +122,6 @@
     (score-a-frame score_card result_of_ball_1 nil nil)))
 
 ;;; 3. Determine whether a game is complete - if so, provide the final score.
-(defn intize-balls
-  "Change the raw score format of balls in a frame, e.g., x, / to integer score"
-  [balls]
-  (remove
-    nil?
-    (vector 
-      (if (= (get balls 0) "x") 10 (read-string (get balls 0)))
-      (if (= (get balls 1) nil)
-        nil
-        (cond
-          (= (get balls 1) "x") 10
-          (= (get balls 1) "/") (- 10 (read-string (get balls 0)))
-          :else (read-string (get balls 1))))
-      (if (= (get balls 2) nil)
-        nil
-        (cond
-          (= (get balls 2) "x") 10
-          (= (get balls 2) "/") (- 10 (read-string (get balls 1)))
-          :else (read-string (get balls 2)))))))
-
 (defn strike? [balls]
   "Check if it is a strike."
   (= 10 (first balls)))
@@ -150,39 +130,40 @@
   "Check if it is a spare."
   (= 10 (apply + (take 2 balls))))
 
-(defn balls-a-frame-score
-  "The number of balls contribute to a frame's score."
-  [balls]
-  (cond
-   (strike? balls) 3
-   (spare? balls) 3
-   :else 2))
-
-(defn balls-a-frame
-  "The number of balls in a frame"
-  [balls]
-  (if (strike? balls) 1 2))
-
 (defn final-frame-scores
   "Count the final scores of each frame"
-  [balls_seq]
-  (if (empty? balls_seq)
-    [0]
-    (concat (vector (reduce + (take (balls-a-frame-score balls_seq) balls_seq)))
-      (final-frame-scores (drop (balls-a-frame balls_seq) balls_seq)))))
+  [frames]
+  (loop [index 0 results []]
+    (if (= index 9)
+      ;; for the last frame
+      (conj results (reduce + (get frames index)))
+      ;; for the first 9 frames
+      (recur (inc index) (conj
+                           results
+                           (let [current_frame (get frames index) next_frame (get frames (+ 1 index))]
+                             (cond
+                               ;; for strike frame
+                               (strike? current_frame) (if (< (count next_frame) 2)
+                                                         ; next frame has 1 ball
+                                                         (+ 10 (get next_frame 0) (let [next_but_one_frame (get frames (+ 2 index))]
+                                                                                   (get next_but_one_frame 0)))
+                                                         ; next frame has 2 or more balls
+                                                         (+ 10 (get next_frame 0) (get next_frame 1)))
+                               ;; for spare frame
+                               (spare? current_frame) (+ 10 (get next_frame 0))
+                               ;; for open frame
+                               :else (reduce + current_frame))))))))
 
 (defn final-score
   "Count the overall score"
   [frame_scores]
-  (reduce + (take 10 frame_scores)))
+  (reduce + frame_scores))
 
 (defn check-complete
   "Determine whether a game is complete. If so, provide the final score"
   [score_card]
   (if (= 10 (count score_card))
-    (final-score
-      (final-frame-scores
-        (flatten (map intize-balls score_card))))
+    (final-score (final-frame-scores score_card))
     nil))
 
 (defn -main
