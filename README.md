@@ -29,28 +29,28 @@ You should see results as below.
     Creating a new score card
     []
     Add the 1st frame
-    [[x]]
+    [[10]]
     Add the 2nd frame
-    [[x] [7 /]]
+    [[10] [7 3]]
     Add the 3rd frame
-    [[x] [7 /] [7 2]]
+    [[10] [7 3] [7 2]]
     Add the 4th frame
-    [[x] [7 /] [7 2] [9 /]]
+    [[10] [7 3] [7 2] [9 1]]
     Add the 5th frame
-    [[x] [7 /] [7 2] [9 /] [x]]
+    [[10] [7 3] [7 2] [9 1] [10]]
     Add the 6th frame
-    [[x] [7 /] [7 2] [9 /] [x] [x]]
+    [[10] [7 3] [7 2] [9 1] [10] [10]]
     Add the 7th frame
-    [[x] [7 /] [7 2] [9 /] [x] [x] [x]]
+    [[10] [7 3] [7 2] [9 1] [10] [10] [10]]
     Add the 8th frame
-    [[x] [7 /] [7 2] [9 /] [x] [x] [x] [2 3]]
+    [[10] [7 3] [7 2] [9 1] [10] [10] [10] [2 3]]
     Add the 9th frame
-    [[x] [7 /] [7 2] [9 /] [x] [x] [x] [2 3] [6 /]]
+    [[10] [7 3] [7 2] [9 1] [10] [10] [10] [2 3] [6 4]]
     Add the 10th frame
-    [[x] [7 /] [7 2] [9 /] [x] [x] [x] [2 3] [6 /] [7 / 3]]
+    [[10] [7 3] [7 2] [9 1] [10] [10] [10] [2 3] [6 4] [7 3 3]]
     Show the final score:
     168
-   
+       
 ## Examples of using the APIs
 
 ###1. Create an empty score card
