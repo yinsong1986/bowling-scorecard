@@ -14,17 +14,7 @@
     (= nil ball) nil ; dummy ball
     (= "x" ball) :strike
     (= "/" ball) :spare
-    (or
-      (= "0" ball)
-      (= "1" ball)
-      (= "2" ball)
-      (= "3" ball)
-      (= "4" ball)
-      (= "5" ball)
-      (= "6" ball)
-      (= "7" ball)
-      (= "8" ball)
-      (= "9" ball)) (read-string ball)
+    (contains? #{"0" "1" "2" "3" "4" "5" "6" "7" "8" "9"} ball) (read-string ball)
     :else (throw (Exception. "Illeagal result of balls."))))
 
 (defn check-valid
