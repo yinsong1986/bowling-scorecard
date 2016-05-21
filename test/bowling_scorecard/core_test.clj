@@ -96,6 +96,20 @@
     (is (= false (spare? [5 3])))
     (is (= false (spare? [10])))))
 
+(deftest nth-frame-score-test
+  (testing "Count the final score of the nth frame."
+    (is (= 20
+           (nth-frame-score [[10]
+                                [7 3]
+                                [7 2]
+                                [9 1]
+                                [10]
+                                [10]
+                                [10]
+                                [2 3]
+                                [6 4]
+                                [7 3 3]] 0)))))
+
 (deftest final-frame-scores-test
   (testing "Count the final score of each frame."
     (is (= [20 17 9 20 30 22 15 5 17 13]

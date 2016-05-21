@@ -132,29 +132,30 @@
     (= 10 (apply + (take 2 balls)))
     false))
 
+(defn nth-frame-score
+  "Count the final score for the nth frame"
+  [frames n]
+  (let [{frame_n n
+         frame_n_plus_one (inc n)
+         frame_n_plus_two (+ n 2)} frames] ; Get the nth, (n+1)th, (n+2)th frame
+    (if (= n 9)
+      ;; for the last frame
+      (reduce + frame_n)
+      ;; for the first 9 frames
+      (let [[ball_one ball_two] (concat frame_n_plus_one frame_n_plus_two)] ; Get related two balls for counting
+        (cond
+          ; for strike frame, add two balls
+          (strike? frame_n) (+ 10 ball_one ball_two)
+          ; for spare frame
+          (spare? frame_n) (+ 10 ball_one)
+          ; for open frame
+          :else (reduce + frame_n))))))
+
 (defn final-frame-scores
   "Count the final scores of each frame"
   [frames]
-  (loop [index 0 results []]
-    (if (= index 9)
-      ;; for the last frame
-      (conj results (reduce + (get frames index)))
-      ;; for the first 9 frames
-      (recur (inc index) (conj
-                           results
-                           (let [current_frame (get frames index) next_frame (get frames (+ 1 index))]
-                             (cond
-                               ;; for strike frame
-                               (strike? current_frame) (if (< (count next_frame) 2)
-                                                         ; next frame has 1 ball
-                                                         (+ 10 (get next_frame 0) (let [next_but_one_frame (get frames (+ 2 index))]
-                                                                                   (get next_but_one_frame 0)))
-                                                         ; next frame has 2 or more balls
-                                                         (+ 10 (get next_frame 0) (get next_frame 1)))
-                               ;; for spare frame
-                               (spare? current_frame) (+ 10 (get next_frame 0))
-                               ;; for open frame
-                               :else (reduce + current_frame))))))))
+  (let [frames_list (repeat 10 frames) n_list (range 10)]
+    (map nth-frame-score frames_list n_list)))
 
 (defn final-score
   "Count the overall score"
