@@ -21,75 +21,69 @@
   "Check if the balls are valid for a frame, return valid ints or nil"
   [result_of_ball_1 result_of_ball_2 result_of_ball_3 number_of_finished_frames]
   (cond
-    ;; One ball
-    (and
-      (= false (nil? result_of_ball_1))
-      (= true (nil? result_of_ball_2))
-      (= true (nil? result_of_ball_3))) (if (and ; is strike and not the last frame
-                                              (= result_of_ball_1 :strike) ;
-                                              (< number_of_finished_frames 9))
-                                          [10]
-                                          nil)
-    ;; Two balls
-    (and 
-      (= false (nil? result_of_ball_1))
-      (= false (nil? result_of_ball_2))
-      (= true (nil? result_of_ball_3))) (cond
-                                          ; spare and not the last frame
-                                          (and
-                                            (integer? result_of_ball_1)
-                                            (= result_of_ball_2 :spare)
-                                            (< number_of_finished_frames 9)) [result_of_ball_1 (- 10 result_of_ball_1)]
-                                          ; open frame
-                                          (and
-                                            (integer? result_of_ball_1)
-                                            (integer? result_of_ball_2)
-                                            (< (+ result_of_ball_1 result_of_ball_2) 10)) [result_of_ball_1 result_of_ball_2]
-                                          ; others not valid
-                                          :else nil)
-    ;; Three balls, only valid for last frame
-    (and
-      (= false (nil? result_of_ball_1))
-      (= false (nil? result_of_ball_2))
-      (= false (nil? result_of_ball_3))
-      (= number_of_finished_frames 9)) (cond
-                                         ; strike, strike, strike
-                                         (and 
-                                           (= result_of_ball_1 :strike)
-                                           (= result_of_ball_2 :strike)
-                                           (= result_of_ball_3 :strike)) [10 10 10]
-                                         ; strike, strike, open frame
-                                         (and 
-                                           (= result_of_ball_1 :strike)
-                                           (= result_of_ball_2 :strike)
-                                           (integer? result_of_ball_3)) [10 10 result_of_ball_3]
-                                         ; strike, spare
-                                         (and 
-                                           (= result_of_ball_1 :strike)
-                                           (integer? result_of_ball_2)
-                                           (= result_of_ball_3 :spare)) [10 result_of_ball_2 (- 10 result_of_ball_2)]
-                                         ; strike, open frame
-                                         (and 
-                                           (= result_of_ball_1 :strike)
-                                           (integer? result_of_ball_2)
-                                           (integer? result_of_ball_3)
-                                           (< (+ result_of_ball_2 result_of_ball_3) 10)) [10 result_of_ball_2 result_of_ball_3]
-                                         ; spare, open frame
-                                         (and
-                                           (integer? result_of_ball_1)
-                                           (= result_of_ball_2 :spare)
-                                           (integer? result_of_ball_3)) [result_of_ball_1 (- 10 result_of_ball_1) result_of_ball_3]
-                                         ; spare, strike
-                                         (and
-                                           (integer? result_of_ball_1)
-                                           (= result_of_ball_2 :spare)
-                                           (= result_of_ball_3 :strike)) [result_of_ball_1 (- 10 result_of_ball_1) 10]
-                                         ; others not valid
-                                         :else nil) 
-    ;; Others not valid
-    :else nil
- )
-)
+    ;; first 9 frames
+    (< number_of_finished_frames 9) (cond
+                                      ;; first strike, second nil, third nil
+                                      (and (= result_of_ball_1 :strike) (= nil result_of_ball_2) (= nil result_of_ball_3)) [10] 
+                                      ;; first open frame, third nil
+                                      (and 
+                                        (integer? result_of_ball_1)
+                                        (= nil result_of_ball_3)) (cond
+                                                                    ; second spare
+                                                                    (= result_of_ball_2 :spare) [result_of_ball_1 (- 10 result_of_ball_1)]
+                                                                    ; second open frame
+                                                                    (and
+                                                                      (integer? result_of_ball_2)
+                                                                      (< (+ result_of_ball_1 result_of_ball_2) 10)) [result_of_ball_1 result_of_ball_2]
+                                                                    ; other not valid
+                                                                    :else nil)
+                                      ;; others not valid
+                                      :else nil)
+    ;; last frame
+    (= number_of_finished_frames 9) (cond
+                                      ;; first strike
+                                      (= result_of_ball_1 :strike) (cond
+                                                                     ;; second strike
+                                                                     (= result_of_ball_2 :strike) (cond
+                                                                                                    ; third strike
+                                                                                                    (= result_of_ball_3 :strike) [10 10 10]
+                                                                                                    ; third open frame
+                                                                                                    (integer? result_of_ball_3) [10 10 result_of_ball_3]
+                                                                                                    ; others not valid
+                                                                                                    :else nil)
+                                                                     ;; second open frame
+                                                                     (integer? result_of_ball_2) (cond
+                                                                                                   ; third spare
+                                                                                                   (= result_of_ball_3 :spare) [10 result_of_ball_2 (- 10 result_of_ball_2)]
+                                                                                                   ; third open frame
+                                                                                                   (and
+                                                                                                     (integer? result_of_ball_3)
+                                                                                                     (< (+ result_of_ball_2 result_of_ball_3) 10)) [10 result_of_ball_2 result_of_ball_3]
+                                                                                                   ; others not valid
+                                                                                                   :else nil)
+                                                                     ;; other not valid
+                                                                     :else nil)
+                                      ;; first open frame
+                                      (integer? result_of_ball_1) (cond
+                                                                   ;; second spare
+                                                                   (= result_of_ball_2 :spare) (cond
+                                                                                                 ; third open frame
+                                                                                                 (integer? result_of_ball_3) [result_of_ball_1 (- 10 result_of_ball_1) result_of_ball_3]
+                                                                                                 ; third strike
+                                                                                                 (= result_of_ball_3 :strike) [result_of_ball_1 (- 10 result_of_ball_1) 10]
+                                                                                                 ; others not valid
+                                                                                                 :else nil)
+                                                                   ;; second open frame, third nil
+                                                                   (and
+                                                                     (integer? result_of_ball_2)
+                                                                     (= nil result_of_ball_3)
+                                                                     (< (+ result_of_ball_1 result_of_ball_2) 10)) [result_of_ball_1 result_of_ball_2]
+                                                                   ;; others not valid
+                                                                   :else nil)
+                                      ;; others not valid
+                                      :else nil)
+    ;; others not valid
+    :else nil))
 
 (defn score-a-frame
   "Given a score card, record a frame"
